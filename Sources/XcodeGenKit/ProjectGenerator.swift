@@ -176,7 +176,7 @@ public class ProjectGenerator {
                 } else {
                     for configVariant in targetScheme.configVariants {
 
-                        let schemeName = "\(target.name) \(configVariant)"
+                        let schemeName = "\(target.name)_\(configVariant)"
 
                         let debugConfig = project.configs
                             .first { $0.type == .debug && $0.name.contains(configVariant) }!
