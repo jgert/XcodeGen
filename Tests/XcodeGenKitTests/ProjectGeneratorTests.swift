@@ -1,3 +1,4 @@
+import Foundation
 import PathKit
 import ProjectSpec
 import Spectre
@@ -626,6 +627,81 @@ func projectGeneratorTests() {
             }
 
             $0.it("excludes sources") {
+                let directories = """
+                Sources:
+                  - A:
+                    - a.swift
+                    - B:
+                      - b.swift
+                      - b.ignored
+                    - a.ignored
+                  - B:
+                    - b.swift
+                  - D:
+                    - d.h
+                    - d.m
+                  - E:
+                    - e.jpg
+                    - e.h
+                    - e.m
+                    - F:
+                      - f.swift
+                  - G:
+                    - H:
+                      - h.swift
+                  - types:
+                    - a.swift
+                    - a.m
+                    - a.h
+                    - a.x
+                  - numbers:
+                    - file1.a
+                    - file2.a
+                    - file3.a
+                    - file4.a
+                  - partial:
+                    - file_part
+                  - ignore.file
+                  - a.ignored
+
+                """
+                try createDirectories(directories)
+
+                let excludePatterns = [
+                    "\\/F\\/",
+                    "\\/numbers\\/"
+                ]
+
+                let excludes = try excludePatterns.map({
+                    try NSRegularExpression(pattern: $0)
+                })
+
+                let target = Target(name: "Test", type: .application, platform: .iOS, sources: [TargetSource(path: "Sources", excludePatterns: excludes)])
+                let project = Project(basePath: directoryPath, name: "Test", targets: [target])
+
+                let pbxProj = try getPbxProj(project)
+                try pbxProj.expectFile(paths: ["Sources", "A", "a.swift"])
+                try pbxProj.expectFile(paths: ["Sources", "D", "d.h"])
+                try pbxProj.expectFile(paths: ["Sources", "D", "d.m"])
+                try pbxProj.expectFile(paths: ["Sources", "E", "e.jpg"])
+                try pbxProj.expectFile(paths: ["Sources", "E", "e.m"])
+                try pbxProj.expectFile(paths: ["Sources", "E", "e.h"])
+                try pbxProj.expectFile(paths: ["Sources", "types", "a.swift"])
+                try pbxProj.expectFileMissing(paths: ["Sources", "numbers", "file1.a"])
+                try pbxProj.expectFileMissing(paths: ["Sources", "numbers", "file4.a"])
+                try pbxProj.expectFile(paths: ["Sources", "B", "b.swift"])
+                try pbxProj.expectFileMissing(paths: ["Sources", "E", "F", "f.swift"])
+                try pbxProj.expectFile(paths: ["Sources", "G", "H", "h.swift"])
+                try pbxProj.expectFile(paths: ["Sources", "types", "a.h"])
+                try pbxProj.expectFile(paths: ["Sources", "types", "a.x"])
+                try pbxProj.expectFileMissing(paths: ["Sources", "numbers", "file2.a"])
+                try pbxProj.expectFileMissing(paths: ["Sources", "numbers", "file3.a"])
+                try pbxProj.expectFile(paths: ["Sources", "partial", "file_part"])
+                try pbxProj.expectFile(paths: ["Sources", "a.ignored"])
+                try pbxProj.expectFile(paths: ["Sources", "ignore.file"])
+            }
+
+            $0.it("excludes sources by pattern") {
                 let directories = """
                 Sources:
                   - A:
