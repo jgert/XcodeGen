@@ -1,15 +1,15 @@
 pipeline {
   agent any
   stages {
-    stage('Stage 1') {
+    stage('Parallel 1') {
       parallel {
-        stage('Stage 1') {
+        stage('krok 1') {
           steps {
-            sh 'echo "Test"'
-            echo 'Hello 2'
+            echo 'Hello 1.1'
+            echo 'Hello 1.2'
           }
         }
-        stage('Stage 2') {
+        stage('Parallel 2') {
           steps {
             timeout(time: 20)
             echo 'Stage 2'
@@ -17,7 +17,7 @@ pipeline {
         }
       }
     }
-    stage('error') {
+    stage('Opoznienie') {
       steps {
         sleep 1
       }
