@@ -489,7 +489,7 @@ class SourceGenerator {
         excludePatterns = targetSource.excludePatterns
 
         if let platform = platform {
-            var platforms = Set(Platform.all)
+            var platforms = Set(Platform.allCases)
             platforms.remove(platform)
             excludePatterns += try platforms.map({
                 try excludePatternsForPlatform($0)
